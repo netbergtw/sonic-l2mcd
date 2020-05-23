@@ -26,6 +26,20 @@ L2MCD_AVL_TREE *l3_portdb_tree = &gMld.portdb_tree;
 extern bool_t received_clear_grp_notify;
 extern struct list *snooping_enabled_vlans[MCAST_AFI_MAX];
 
+extern void mcgrp_pims_destroy_src_list(MCGRP_CLASS *mcgrp,
+        MCGRP_MBRSHP *mcgrp_mbrshp);
+
+char * mld_get_if_name_from_port(uint16_t port_id)
+{
+	return (portdb_get_ifname_from_portindex(port_id));
+}
+
+uint32_t pim_get_ifindex_from_port(int port)
+{
+    return (IP_IP_PORT(port).config.ifindex);
+
+}
+
 char *
 mld_ntop(mcast_grp_addr_t * addr, char *str)
 {
@@ -52,6 +66,12 @@ mld_vlan_node_t *mld_vlan_node_get(uint32_t vid)
 
     }
 	return vlan_node;
+}
+
+void mld_protocol_port_state_notify(mld_vlan_node_t * vlan_node, UINT32 afi,
+			       MCGRP_CLASS * mld, UINT32 port,
+			       enum BOOLEAN state_up)
+{
 }
 void mld_intialize_with_def_values(mld_cfg_param_t * param)
 {

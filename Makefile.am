@@ -32,7 +32,12 @@ l2mcd_SOURCES = \
 				 port/l2mcd_portdb.c \
                  port/l2mcd_mld_port.c \
                  port/l2mcd_mld_utils.c \
-                 port/mld_vdb.c
+                 port/mld_vdb.c \
+                 src/igmp.c \
+                 src/igmp_cu.c \
+                 src/igmp_fsm.c \
+                 src/igmp_io.c \
+                 src/mld_main.c
 
 l2mcd_CFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) 
 l2mcd_CPPFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) $(COV_CFLAGS) $(ASAN_CFLAGS)
