@@ -30,7 +30,9 @@ l2mcd_SOURCES = \
                  port/l2mcd_system.c \
 				 port/l2mcd_utils.c \
 				 port/l2mcd_portdb.c \
-                 port/l2mcd_mld_utils.c 
+                 port/l2mcd_mld_port.c \
+                 port/l2mcd_mld_utils.c \
+                 port/mld_vdb.c
 
 l2mcd_CFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) 
 l2mcd_CPPFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) $(COV_CFLAGS) $(ASAN_CFLAGS)

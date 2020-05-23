@@ -26,6 +26,8 @@
 #include "l2mcd_mld_port.h"
 #include "l2mcd_mcast_co.h"
 #include <sys/ioctl.h>
+#include "l2mcd_dbsync.h"
+#include "l2mcd_portdb.h"
 
 L2MCD_CONTEXT l2mcd_context;
 MCGRP_GLOBAL_CLASS    gMld, *pgMld = &gMld;
@@ -51,6 +53,7 @@ void l2mcd_100ms_timer(evutil_socket_t fd, short what, void *arg)
 
 void l2mcd_libevent_destroy(struct event *ev)
 {
+    g_l2mcd_stats_libev_no_of_sockets--;
     event_del(ev);
 }
 
@@ -432,10 +435,24 @@ int l2mcd_system_init(int flag)
         g_l2mcd_vlan_log_mask =L2MCD_LOG_MASK_INFO|L2MCD_LOG_MASK_DEBUG;
         L2MCD_INIT_LOG("Enabing vlan debug all on init");
     }
-   
+    
+    /* IGMP Vlan Database Init */
+    rc = mld_vdb_init();
+    if (rc <0)
+    {
+        L2MCD_LOG_ERR(" L2MCD VLAN DB Init failed (error %d)", rc);
+        return -1;
+    }
 
     l2mcd_avll_init();
+    mcast_igmp_init();
+    portdb_init();
+    mld_portdb_gvid_hash_init();
+
+    port_ifname_db_init();
+    l3_time_freq_init();
     signal(SIGPIPE, SIG_IGN);
+
     cfg = event_config_new();
     if (!cfg)
     {

@@ -76,6 +76,7 @@
 #define L2MCD_100MS_TIMEOUT 100000 
 #define L2MCD_VLAN_MAX 4095
 #define L2MCD_RX_BUFFER_SIZE  2048
+extern int applog_level_map[APP_LOG_LEVEL_MAX + 2];
 
 
 #define L2MCD_BF_RD(reg, off, mask)   (((reg) & (mask)) >> (off))
@@ -130,6 +131,58 @@ static inline L2MCD_AVL_TREE L2MCD_AVL_CREATE(avl_comparison_func *func, void *p
 #define M_AVLL_DESTROY avl_destroy
 #define M_AVLL_INIT_NODE(NODE) 
 #define M_AVLL_SET_REBALANCE(TREE, FLAG)
+
+
+typedef enum {
+    L2MCD_IF_TYPE_UNKNOWN_IF  = 2,    /* reserved */
+    L2MCD_IF_TYPE_PHYSICAL    = 6,    /* physical GE interface */
+    L2MCD_IF_TYPE_L2_TRUNK    = 10 ,  /* external (user visible) trunk */
+    L2MCD_IF_TYPE_SVI         = 18,   /* Switch Virtual Ifc- IP maps on multiple L2 */
+    L2MCD_IF_TYPE_LOOPBACK_IF = 22,   /* L3 loopback interface */
+} ifm_type_t;
+
+#define  is_virtual_port(port)       			(port<L2MCD_PORTDB_PHYIF_START_IDX)
+#define  is_physical_port(port)		            (port >= L2MCD_PORTDB_PHYIF_START_IDX)
+
+/* Generate the logical ifIndex based on type specific if id */
+static inline ifindex_t l2mcd_ifindex_create_logical_idx(ifm_type_t type, uint port_id)
+{
+    return (L2MCD_IFIDX_TYPE_BF(type) | L2MCD_IFIDX_IFID_BF(port_id));
+}
+static inline bool_t l2mcd_ifindex_is_svi(ifindex_t ifidx)
+{
+  return (L2MCD_IFIDX_TYPE(ifidx) == L2MCD_IF_TYPE_SVI);
+}
+static inline int l2mcd_ifindex_get_svi_vid(ifindex_t ifidx)
+{
+  if (L2MCD_IFIDX_TYPE(ifidx) == L2MCD_IF_TYPE_SVI) {
+		return (ifidx & 0x3ffff);	/* vlanid was lsb 12 bit but extended to 18 bits */	
+  } else {
+    return (-1);
+  }	
+}
+static inline int l2mcd_ifindex_is_physical(ifindex_t ifidx)
+{
+    if (L2MCD_IFIDX_TYPE(ifidx) == L2MCD_IF_TYPE_PHYSICAL)
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline int l2mcd_ifindex_is_trunk(ifindex_t ifidx)
+{
+    if (L2MCD_IFIDX_TYPE(ifidx) == L2MCD_IF_TYPE_L2_TRUNK)
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+static inline int l2mcd_ifindex_is_tunnel (ifindex_t ifidx)
+{
+    return FALSE;
+}
+
 
 typedef struct l2mcd_if_tree_s
 {

@@ -116,5 +116,67 @@ enum MLD_VLAN_DB_ERR_VALS {
 #define MLD_VLAN_NSM (1 << 0) 
 #define MLD_VLAN_DCM (1 << 1)
 
+int mld_vdb_init(void);
+//Create vlan_db entry
+mld_vlan_node_t * mld_vdb_vlan_create(mld_vlan_db_t *vlan_db, uint32_t vlan_id, uint8_t type,
+    uint32_t flags, uint32_t vlan_flags, uint16_t ivid, char *vlan_name, int vlan_creation_type);
+//Delete VDB entry
+int mld_vdb_vlan_del(mld_vlan_db_t *vlan_db, uint32_t vlan_id, uint8_t type);
+//Add port to vdb port_tree
+int mld_vdb_add_port_to_vlan(mld_vlan_db_t *vlan_db, uint32_t vlan_id, 
+    uint32_t port_num, uint8_t type);
+//Remove port from vdb port_tree
+int mld_vdb_del_port_frm_vlan(mld_vlan_db_t *vlan_db, uint32_t vlan_id, 
+    uint32_t port_num, uint8_t type);
+
+void mld_free_cfg_param(mld_vlan_node_t *vlan_node, uint8_t afi);
+void mld_free_cfg(mld_vlan_node_t *vlan_node, uint8_t afi);
+uint8_t is_mld_vlan_snooping_enabled(mld_vlan_node_t *vlan, uint8_t afi);
+void print_mrtr_list(mld_vlan_node_t *vlan_node, uint8_t afi);
+void print_static_grp_list(mld_vlan_node_t *vlan_node, uint8_t afi);
+void print_vlan_port_mbrship(mld_vlan_node_t *vlan_node);
+void print_vlandb_details(mld_vlan_node_t *vlan_node);
+void mld_poplate_bitmap(uint32_t *port_bitmap, uint32_t *ifindex_list, uint32_t size);
+void mld_populate_ifindex_list(uint32_t *ifindex, uint32_t *bitmap, uint32_t *size);
+unsigned int mld_portdb_get_ivid_from_gvid(uint32_t vlan_id, uint8_t type);
+int mld_portdb_delete_gvid(unsigned long gvid);
+int mld_portdb_add_gvid(unsigned long gvid, unsigned long ivid);
+int mld_portdb_gvid_hash_init(void);
+int mld_portdb_gvid_hash_function(unsigned long key);
+int mld_portdb_gvid_key_compare(unsigned long key1, unsigned long key2);
+struct list * mld_vdb_vlan_get_static_grp_list(mld_vlan_node_t *vlan_node, int create, uint8_t afi, BOOLEAN is_ve);
+struct list *mld_vdb_vlan_get_mrtr_list(mld_vlan_node_t *vlan_node, int create, uint8_t afi);
+mld_cfg_param_t *mld_vdb_vlan_get_cfg_param(mld_vlan_node_t *vlan_node, int create, uint8_t afi);
+int is_mld_vlan_snooping_allowed(uint32_t vid, uint16_t vrfid, MCGRP_CLASS  *mld,
+                                                             int glb_mode, uint8_t type );
+uint8_t is_mld_vlan_l3_enabled(mld_vlan_node_t *vlan, uint8_t afi);
+mld_vlan_node_t * mld_vdb_vlan_get(uint32_t vlan_id, uint8_t type);
+uint32_t *mld_vdb_vlan_get_mrtr_bitmap(mld_vlan_node_t *vlan_node, int create, uint8_t afi);
+mld_cfg_t *mld_vdb_vlan_get_cfg(mld_vlan_node_t *vlan_node, int create, uint8_t afi);
+void mld_vlan_add_list(mld_vlan_node_t *vlan_p, uint8_t afi);
+void mld_vlan_del_list(mld_vlan_node_t *vlan_p, uint8_t afi);
+int mld_vdb_vlan_is_present_in_protocol(mld_vlan_node_t *vlan_node, uint8_t afi);
+int mld_lookup_gvid_by_ivid(mld_vlan_node_t *vlan_node, uint16_t vlan_id, unsigned long *gvid);
+uint8_t is_mld_snooping_enabled(MCGRP_L3IF *mcgrp_vport, uint8_t afi);
+void mld_set_vlan_flag(mld_vlan_node_t *vlan_p, uint8_t afi, uint32_t flag);
+void mld_unset_vlan_flag(mld_vlan_node_t *vlan_p, uint8_t afi, uint32_t flag);
+uint32_t mld_is_flag_set(mld_vlan_node_t *vlan_p, uint8_t afi, uint32_t flag);
+mld_vlan_node_t *mld_vlan_create_fwd_ref(uint32_t gvid, uint8_t type);
+int mld_add_static_grp_node_to_pending_list(mld_vlan_node_t *vlan_node, mld_l2_static_group_t *input_msg, int add, BOOLEAN is_ve);
+uint8_t mld_is_port_member_of_vlan(mld_vlan_node_t *vlan, uint32_t port_num);
+void mld_vlan_delete_confg(mld_vlan_node_t *vlan_node);
+void mld_intialize_with_def_values(mld_cfg_param_t * param);
+uint8_t is_mld_l3_configured(MCGRP_L3IF *mcgrp_vport);
+int mld_add_static_mrtr_to_pending_list(mld_vlan_node_t *vlan_node, 
+							  char *if_name, int add, uint8_t afi);
+extern mld_vlan_node_t *mld_get_vlan_by_ivid(UINT16 ivid);
+mld_vlan_node_t *mld_vlan_node_get(uint32_t vid);
+int mld_unset_vlan_dcm_flag(uint32_t gvid,uint8_t type);
+int mld_set_vlan_dcm_flag(uint32_t gvid,uint8_t type);
+mld_vlan_db_t * mld_vlan_get_db();
+uint8_t is_mld_snooping_querier_enabled(MCGRP_L3IF *mcgrp_vport);
+uint8_t is_mld_fast_leave_configured(MCGRP_L3IF *mcgrp_vport);
+uint32_t mld_get_gvid(uint32_t ivid);
+void mld_vlan_cleanup(mld_vlan_node_t *vlan);
 #endif /* __MLD_VLAN_DB_H__ */
 
