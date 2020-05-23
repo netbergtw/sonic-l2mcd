@@ -149,4 +149,168 @@ typedef struct MAC_ADDRESS
 
 typedef UINT32 VRF_INDEX;
 
+
+#define GENERIC_POOL_NUMBER 64
+
+#define GENPOOL_ALLOC_MAGIC     0xDEADCAFE
+#define GENPOOL_FREE_MAGIC      0xFEEDCAFE
+#define POOL_SIZE_HUGE_NUMBER 2000000000
+
+#define MEM_SIZE_8M   0x800000
+#define MEM_SIZE_4M   0x400000
+#define MEM_SIZE_2M   0x200000
+#define MEM_SIZE_1M   0x100000
+#define MEM_SIZE_512K 0x080000
+#define MEM_SIZE_256K 0x040000
+#define MEM_SIZE_128K 0x020000
+#define MEM_SIZE_64K  0x010000
+#define MEM_SIZE_32K  0x008000
+#define MEM_SIZE_16K  0x004000
+#define MEM_SIZE_8K   0x002000
+#define MEM_SIZE_4K   0x001000
+#define MEM_SIZE_2K   0x000800
+#define MEM_SIZE_1K   0x000400
+
+#define STACK_DEPTH 28
+
+enum _GENERIC_POOL_FLAGS
+{
+	GENERIC_POOL_NO_GROW = 0x1,
+	GENERIC_POOL_DONT_ALLOC = 0x2, // Don't allocate it initially
+// if NO_GROW=0, then grow it linearly, 
+// otherwise it is about 1.5 times
+	GENERIC_POOL_LINEAR_GROW = 0x4,
+	GENERIC_POOL_MEMCHK_ON = 0x8         // Enable magic word for each unit of a pool
+};
+
+struct MEM_ALLOCATOR;
+
+typedef void *(*ALLOC_FUNC)(unsigned int size, struct MEM_ALLOCATOR *allocator);
+typedef void *(*ALLOC_ZERO_FUNC)(unsigned int size, struct MEM_ALLOCATOR *allocator);
+typedef void (*FREE_FUNC)(void *ptr, struct MEM_ALLOCATOR *allocator);
+
+typedef struct MEM_ALLOCATOR
+{
+	ALLOC_FUNC alloc;
+	ALLOC_ZERO_FUNC alloc_zero;
+	FREE_FUNC free;
+	void *context;
+} MEM_ALLOCATOR;
+
+extern MEM_ALLOCATOR os_malloc_allocator;
+#define dy_malloc_allocator     os_malloc_allocator
+
+typedef struct generic_pool_struct
+{
+	void* pools[GENERIC_POOL_NUMBER];
+	void* avail_data;
+	MEM_ALLOCATOR *allocator;
+	int initial_number;
+	int unit_size;
+	int pool_index;
+	int total_number;
+	int allocated_number; // This is in use
+	int alloc_failure; // This is get_mem failure include malloc failure
+	int flag;
+	int upper_limit;
+	int min_system_memory; // The system must have this number of system memory AFTER grow.
+	struct
+	{
+		UINT16 free;
+		UINT16 corrupt;
+	} magic_failure;
+} generic_pool_struct;
+
+typedef struct GENERIC_LINK_DATA
+{
+	struct GENERIC_LINK_DATA *next;
+	void * data;
+} GENERIC_LINK_DATA;
+
+typedef struct SORTED_LINKLIST_KEYINFO
+{
+	int	key_size;
+	int	 (*key_compare)(void *keya, void *keyb);
+	void (*key_assign)(void *keya, void *keyb);
+	void (*key_destroy)(generic_pool_struct* pool, void *item);
+	int  (*key_match)(BOOLEAN add, void *keya, void *keyb, void* param);
+	void *param;
+} SORTED_LINKLIST_KEYINFO;
+
+typedef struct SORTED_LINKLIST
+{
+	struct SORTED_LINKLIST	*next;
+	char						key; // must be in ascending order. - a variable sized key
+} SORTED_LINKLIST;
+
+typedef struct GEN_DOUBLE_LINK_LIST_ENTRY
+{
+	// These should always be the first two fields of your entry definition
+	struct GEN_DOUBLE_LINK_LIST_ENTRY *prev;
+	struct GEN_DOUBLE_LINK_LIST_ENTRY *next;
+} GEN_DOUBLE_LINK_LIST_ENTRY;
+
+
+
+typedef struct LINKLIST_TYPE
+{
+	struct LINKLIST_TYPE *next;
+} LINKLIST_TYPE;
+
+int init_generic_pool(generic_pool_struct *pool, int initial_number,
+					  int unit_size, int flag);
+void generic_free_mem_to_pool(generic_pool_struct *pool, void * item);
+void* generic_get_mem_from_pool(generic_pool_struct *pool);
+int init_generic_pool2(generic_pool_struct *pool, int initial_number,
+					   int unit_size, int flag, MEM_ALLOCATOR *allocator);
+int set_generic_pool_upper_limit(generic_pool_struct *pool, int upper_limit);
+UINT32 sorted_linklist_traverse_by_reference(
+	SORTED_LINKLIST_KEYINFO *key_info, UINT32 (*action)(void *, ULONG),
+	SORTED_LINKLIST *dest, SORTED_LINKLIST *ref, ULONG user_para);
+SORTED_LINKLIST *sorted_linklist_convert_array_to_linklist( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, UINT32 num_of_key, void *key_ary);
+int sorted_linklist_is_any_present( SORTED_LINKLIST_KEYINFO *key_info, 
+        SORTED_LINKLIST * A, SORTED_LINKLIST * B);
+void sorted_linklist_add_from_array( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p,
+	UINT32 source_ary_index, void *source_ary);
+void sorted_linklist_add( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+void sorted_linklist_move( generic_pool_struct *pool, SORTED_LINKLIST_KEYINFO *key_info,
+	SORTED_LINKLIST **dest_p, SORTED_LINKLIST **src_p);
+SORTED_LINKLIST* sorted_linklist_make_minus( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST* src1, SORTED_LINKLIST* src2);
+void sorted_linklist_move_keep_old( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, SORTED_LINKLIST **src_p);
+SORTED_LINKLIST* sorted_linklist_make_common( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST* src1, SORTED_LINKLIST* src2);
+SORTED_LINKLIST* sorted_linklist_clone( generic_pool_struct *pool, SORTED_LINKLIST_KEYINFO *key_info,
+	UINT32 (*action)(void *, void *), SORTED_LINKLIST *src);
+void sorted_linklist_free_list( generic_pool_struct *pool, SORTED_LINKLIST_KEYINFO *key_info,
+	SORTED_LINKLIST *src);
+SORTED_LINKLIST* sorted_linklist_add_one_item(generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, void *src);
+void sorted_linklist_minus( generic_pool_struct *pool, SORTED_LINKLIST_KEYINFO *key_info,
+	SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+void sorted_linklist_keep_common( generic_pool_struct *pool, SORTED_LINKLIST_KEYINFO *key_info,
+	SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+void free_generic_pool(generic_pool_struct *pool);
+void generic_free_entire_linklist(GENERIC_LINK_DATA* head, generic_pool_struct *pool);
+void **general_alloc_memory_chain2(generic_pool_struct *pool, int size, void * avail);
+int get_pool_grow_factor(int index);
+UINT32 mem_round_up_size(UINT32 size);
+void quick_sort_generic_anykey(int start_index, int end_index,
+						UINT32* index_ary, char* val_ary,
+						SORTED_LINKLIST_KEYINFO *key_info);
+SORTED_LINKLIST *sorted_linklist_alloc_and_append( generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **head, SORTED_LINKLIST *prev, void *key);
+void sorted_linklist_merge( generic_pool_struct *pool, SORTED_LINKLIST_KEYINFO *key_info,
+	SORTED_LINKLIST **dest_p, SORTED_LINKLIST **src_p);
+SORTED_LINKLIST* sorted_linklist_del_one_item(generic_pool_struct *pool,
+	SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, void *src);
+int generic_get_pool_upper_limit(generic_pool_struct *pool);
+int generic_get_pool_total_number(generic_pool_struct *pool);
+int sorted_linklist_is_subset( SORTED_LINKLIST_KEYINFO *key_info,
+	SORTED_LINKLIST * A, SORTED_LINKLIST * B);
+
 #endif //__L2MCD_DATA_STRUCT__
