@@ -46,4 +46,74 @@
 #define MLD_PROTO_MROUTER 1
 #define MLD_PIM_MROUTER  2
 
+/* Used by PIM Snooping */
+#define PIMS_WG_MBR_PORT			(1 << 0)  	//0x01   
+#define PIMS_SG_MBR_PORT			(1 << 1)	//0x02   
+#define MLD_OR_IGMP_JOIN_PORT       (1 << 2)
+#define IGMP_V1_MBR_PORT 			(1 << 3)
+#define IGMP_V2_MBR_PORT			(1 << 4)
+#define IGMP_V3_MBR_PORT            (1 << 5)
+#define IGMP_LEAVE_PENDING_MBR_PORT (1 << 6)
+
+/*MLD Module-wide Error Codes*/
+#define	MLD_SUCCESS								(0)
+#define	MLD_CLI_ERR_NO_SUCH_IFF					(-6)
+#define	MLD_CLI_ERR_QI_LE_QRI					(-17)
+#define	MLD_CLI_ERR_QRI_GT_QI					(-18)
+#define	MLD_CLI_ERR_ILL_ADD						(-39)
+#define	MLD_CLI_ERR_L2_CONFIG_PRESENT			(-43)
+#define IGMP_CLI_ERR_MAX_LIMIT_REACHED          (-54)
+
+
+
+#define MLD_CONVERT_IPV4MCADDR_TO_MAC(IPV4MCA, MAC)				\
+  ((u_int8_t *) (MAC)) [0] = 0x01;                                    \
+  ((u_int8_t *) (MAC)) [1] = 0x00;                                    \
+  ((u_int8_t *) (MAC)) [2] = 0x5e;							           \
+  ((u_int8_t *) (MAC)) [3] = (((u_int8_t *) (IPV4MCA)) [1] & 0x7F);   \
+  ((u_int8_t *) (MAC)) [4] = ((u_int8_t *) (IPV4MCA)) [2];            \
+  ((u_int8_t *) (MAC)) [5] = ((u_int8_t *) (IPV4MCA)) [3];            \
+
+/* Macro to Convert IPv6 Multicast Addr into MAC Addr */
+#define MLD_CONVERT_IPV6MCADDR_TO_MAC(IPV6MCA, MAC)                  \
+do {                                                                  \
+  ((u_int8_t *) (MAC)) [0] = 0x33;                                    \
+  ((u_int8_t *) (MAC)) [1] = 0x33;                                    \
+  ((u_int8_t *) (MAC)) [2] = ((u_int8_t *) (IPV6MCA)) [12];           \
+  ((u_int8_t *) (MAC)) [3] = ((u_int8_t *) (IPV6MCA)) [13];   		   \
+  ((u_int8_t *) (MAC)) [4] = ((u_int8_t *) (IPV6MCA)) [14];            \
+  ((u_int8_t *) (MAC)) [5] = ((u_int8_t *) (IPV6MCA)) [15];            \
+} while (0)
+
+#define MLD_VLAN_NAME_MAX 16
+
+#define GET_MLD_VLAN_NAME(_comp_if_name, _vid)                  \
+        char _vname[MLD_VLAN_NAME_MAX + 1];                     \
+        memset(_vname, 0, MLD_VLAN_NAME_MAX + 1);               \
+        snprintf(_vname, MLD_VLAN_NAME_MAX, "VLAN%04d", _vid);  \
+        strncpy (_comp_if_name, _vname, MLD_VLAN_NAME_MAX);
+
+typedef uint32_t mld_vid_t;
+
+typedef enum mld_if_type_s
+{
+	MLD_TYPE_NONE,
+	MLD_SNOOPING,
+	MLD_L3
+} mld_if_type_t;
+
+typedef struct mcast_grp_addr_s
+{
+	union {
+		uint32_t ipv4_addr;
+		struct in6_addr ipv6_addr;
+	}ip;
+	uint8_t afi;
+} mcast_grp_addr_t;
+
+typedef struct mld_l2_static_group_s
+{
+    mcast_grp_addr_t  grp_addr;
+    char ifname[100];
+} mld_l2_static_group_t;
 #endif //__L2MCD_MLD_UTILS__
