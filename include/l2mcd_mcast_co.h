@@ -1163,4 +1163,209 @@ typedef enum intf_type_new_s {
 
 
 extern unsigned long long l3_ref_time;
+/**************************************************
+ * Function Prototypes
+ **************************************************/
+
+BOOLEAN mcgrp_global_pools_init (UINT32  afi);
+void mcgrp_service_wheel_timer_ms (UINT32 afi);
+TRUNK_STATE trunk_port_state(PORT_ID port);
+void mcgrp_service_wheel_timer (UINT32 afi);
+int mcgrp_addr_cmp_cb_param (const void *keya, const void *keyb, void *param);
+void set_mask_bit(PORT_MASK *mask, int port);
+void clear_mask_bit(PORT_MASK *mask, int port);
+void mcgrp_free_source (MCGRP_CLASS   *mcgrp, MCGRP_SOURCE  *mcgrp_src);
+void mcgrp_free_client (MCGRP_CLASS   *mcgrp, MCGRP_CLIENT  *mcgrp_clnt);
+TRUNK_ID trunk_id_get(PORT_ID port );
+UINT32 mcgrp_get_remaining_time(WheelTimerId timer_id, WheelTimerElement *timer_elem);
+USHORT calculate_ip_checksum (PSEUDO_IP_PARAMETERS *sptr_pseudo_header, BYTE *bptr_start_from, USHORT length);
+BOOLEAN is_trunk_up( TRUNK_ID trunk_id );
+
+unsigned long sys_get_timeticks();
+unsigned long long sys_get_millisecond(void);
+
+void l2mcd_sync_pims_upd_inherit_ports_to_sg(MCGRP_ENTRY *mcgrp_entry, 
+										MCGRP_MBRSHP *rcvd_mbrshp,
+										uint32_t vid, uint32_t phy_ifindex, 
+										UINT8 afi, UINT8 add,UINT32 ivid);
+BOOLEAN pim_snoop_is_source_present_on_mbr_port(MCGRP_MBRSHP *grp_mbrshp, 
+						uint32_t src_addr, uint8_t afi);
+void l2mcd_sync_inherit_and_send_rte(MCGRP_CLASS  *mcgrp, MCGRP_L3IF *mcgrp_vport, 
+									   MCGRP_ENTRY *mcgrp_entry, UINT32 phy_port_id, MADDR_ST *src_addr, int add_flag);
+
+BOOLEAN pims_is_pim_snoop_mbrship(MCGRP_MBRSHP *mcgrp_mbrshp);
+void mcgrp_pims_age_src_mbrshp(MCGRP_CLASS  *mcgrp, MCGRP_L3IF *mcgrp_vport,
+						MCGRP_ENTRY *mcgrp_entry, MCGRP_MBRSHP *mcgrp_mbrshp,
+						MCGRP_SOURCE *pims_src_entry);
+
+MCGRP_SOURCE* mcgrp_pims_find_src_node_by_addr (MCGRP_CLASS  *mcgrp,
+											MCGRP_MBRSHP *mcgrp_mbrshp,
+											MADDR_ST *src_addr);
+
+void mcgrp_pims_sorted_linklist_del_element(MCGRP_GLOBAL_CLASS *mcgrp_glb,
+								MCGRP_CLASS  *mcgrp, MCGRP_MBRSHP *mcgrp_mbrshp,
+								MADDR_ST *src_addr);
+
+int mcgrp_addr_cmp_cb(void *keya, void *keyb);
+int mcgrp_addr_cmp_cb_param(const void *keya, const void *keyb, void *param);
+int mcgrp_port_id_cmp_cb(void *keya, void *keyb);
+int mcgrp_port_id_cmp_cb_param(void *keya, void *keyb, void *param);
+void mcgrp_process_wte_event(void *wte_param);
+int receive_igmp_packet (IP_PARAMETERS  *sptr_ip_parameters);
+MCGRP_MBRSHP* mcgrp_find_mbrshp_entry_for_grpaddr (MCGRP_CLASS  *mcgrp, 
+        MADDR_ST     *group_address, 
+        UINT16        vir_port_id, 
+        UINT32        phy_port_id);
+void mcgrp_notify_vif_add (MCGRP_CLASS   *mcgrp,
+        MADDR_ST      *group_address,
+        MCGRP_L3IF    *mcgrp_vport,
+        MCGRP_MBRSHP  *mcgrp_mbrshp,
+        MCGRP_ENTRY   *mcgrp_entry,
+        BOOL           sigchange);
+void mcgrp_notify_vif_del(MCGRP_CLASS  *mcgrp, 
+        MADDR_ST     *group_address,
+        MCGRP_L3IF   *mcgrp_vport,
+        MCGRP_ENTRY   *mcgrp_entry,
+        BOOL          sigchange);                                                  
+MCGRP_CLASS  *mcgrp_vrf_alloc (UINT32 afi, VRF_INDEX  vrf_index);
+MCGRP_L3IF* mcgrp_create_l3intf (MCGRP_CLASS  *mcgrp, UINT16        vir_port_id);
+MCGRP_MBRSHP* mcgrp_find_first_mbrshp (MCGRP_ENTRY *mcgrp_grp);
+MCGRP_MBRSHP* mcgrp_find_next_mbrshp (MCGRP_ENTRY   *mcgrp_grp,
+        MCGRP_MBRSHP  *mcgrp_mbrshp);
+MCGRP_ENTRY* mcgrp_find_group_address_entry (MCGRP_CLASS  *mcgrp, 
+        UINT16        vir_port_id, MADDR_ST     *group_address);
+MCGRP_SOURCE* mcgrp_find_source (MCGRP_MBRSHP      *mcgrp_mbrshp, 
+        MADDR_ST          *src_addr, MCGRP_FILTER_MODE  src_mode);
+MCGRP_L3IF *mcgrp_alloc_init_l3if_entry (MCGRP_CLASS   *mcgrp, UINT16         vir_port_id);
+MCGRP_ENTRY* mcgrp_alloc_group_entry (MCGRP_CLASS  *mcgrp,
+        MCGRP_L3IF   *mcgrp_l3if, MADDR_ST     *group_address);
+MCGRP_MBRSHP* mcgrp_alloc_add_mbrshp_entry (MCGRP_CLASS  *mcgrp, 
+        MCGRP_ENTRY  *grp_entry, MCGRP_L3IF   *mcgrp_vport, 
+        UINT32        phy_port_id, BOOLEAN       is_static, 
+        UINT8         version);
+GROUP_ENTRY* mld_mcgrp_find_insert_glb_group_entry (MCGRP_CLASS  *mcgrp, 
+                                                MADDR_ST     *grp_address);
+MCGRP_MBRSHP* mcgrp_find_mbrshp_entry (MCGRP_ENTRY  *grp_entry, UINT32 phy_port_id);
+BOOLEAN igmp_send_igmp_message (MCGRP_CLASS *igmp, UINT16 tx_port_number,
+        UINT32 physical_port, UINT8 type, UINT8 version,
+        UINT32 group_address,  UINT32 source_address,
+        UINT16 response_time, MCGRP_SOURCE*   src_list, BOOLEAN all_srcs,
+        BOOLEAN is_retx);
+void mcgrp_notify_phy_port_del (MCGRP_CLASS *mcgrp, MADDR_ST *group_address,
+        MCGRP_L3IF *mcgrp_vport, UINT32 phy_port_id, BOOL sigchange);
+void mcgrp_destroy_mbrshp_entry (MCGRP_CLASS  *mcgrp, MCGRP_ENTRY  *grp_entry, 
+        MCGRP_MBRSHP *mcgrp_mbrshp);
+void mcgrp_destroy_group_addr (MCGRP_CLASS  *mcgrp, MCGRP_L3IF   *vport, 
+        MCGRP_ENTRY  *del_group);
+int l3_get_port_from_ifindex(int ifindex);
+int igmp_set_if_igmp_version (VRF_INDEX vrf_index, UINT16 vport, UINT8 version);
+MCGRP_PORT_ENTRY* mcgrp_add_phy_port (MCGRP_CLASS  *mcgrp, MCGRP_L3IF   *mcgrp_vport,
+        UINT32        phy_port_id);
+void mcgrp_vport_state_notify (MCGRP_CLASS  *mcgrp, UINT16        vir_port_id,
+        UINT32        phy_port_id, BOOLEAN       up);
+void mcgrp_delete_veport (MCGRP_CLASS *mcgrp, MCGRP_L3IF *mcgrp_vport, UINT32 phy_port_id);
+void igmp_send_general_query( MCGRP_CLASS *igmp, UINT16       tx_port_number,
+        UINT32       physical_port, UINT8        version, UINT32       use_src,
+        UINT16       response_time);
+MCGRP_PORT_ENTRY* mcgrp_find_phy_port_entry (MCGRP_CLASS  *mcgrp, MCGRP_L3IF   *mcgrp_vport,
+        UINT32        phy_port_id);
+void mld_tx_static_report_leave_on_mrtr_port(MCGRP_CLASS  *mld, MADDR_ST *grp_addr, MCGRP_L3IF *mld_vport, 
+											 uint32_t rx_phy_port, uint8_t joinflag);
+UINT32 ip_get_lowest_ip_address_on_port(UINT16 port_number, uint8_t type);
+BOOLEAN igmp_update_ssm_parameters(MCGRP_CLASS *mcgrp, MADDR_ST *group_addr, UINT8 *version,
+        PORT_ID vir_port_id, UINT32 phy_port_id, UINT8 *igmp_action, UINT16 *num_srcs,
+        UINT32 **src_list);
+MCGRP_MBRSHP* mcgrp_update_group_address_table (MCGRP_CLASS *mcgrp, UINT16 vir_port_id, 
+        UINT32 phy_port_id, MADDR_ST *group_address, MADDR_ST *clnt_src_ip, 
+        UINT8 action, UINT8 version, UINT16 num_srcs, void *src_array);
+int l2mcd_system_group_entry_notify(MADDR_ST *group_address, MADDR_ST *src_address, int vir_port,int phy_port_id, int is_static, int insert);
+int l2mcd_system_mrouter_notify(int vir_port, int phy_port_id, int is_static, int insert);
+void mcgrp_port_state_notify (UINT32 afi, VRF_INDEX vrf_index, UINT16 port_id, enum BOOLEAN  up);
+void mcgrp_delete_l3intf (MCGRP_CLASS  *mcgrp, UINT16        vir_port_id);
+enum BOOLEAN igmp_check_valid_range(UINT32  group_address);
+unsigned short l3_get_port_from_bd_id(unsigned int bd_id);
+void igmp_reset_default_values(MCGRP_CLASS *igmp);
+void mld_vport_state_notify (UINT16   vir_port_id, UINT32   phy_port_id, BOOLEAN  up, MCGRP_CLASS *mld);
+enum BOOLEAN is_physical_or_lag_port(int port);
+void mcgrp_notify_source_del_allowed (MCGRP_CLASS *mcgrp, MADDR_ST *group_address,
+        MCGRP_L3IF *mcgrp_vport, MCGRP_MBRSHP *mcgrp_mbrshp, MADDR_ST *source_addr,
+        BOOL sigchange);
+void mcgrp_notify_source_add_blocked (MCGRP_CLASS   *mcgrp, MADDR_ST      *group_address,
+        MCGRP_L3IF    *mcgrp_vport, MCGRP_MBRSHP  *mcgrp_mbrshp, MADDR_ST      *src_addr,
+        BOOL           sigchange);
+void mcgrp_update_age_for_clnts (MCGRP_CLASS  *mcgrp, L2MCD_AVL_TREE  *clnt_tree, 
+        MADDR_ST     *clnt_ip_addr, UINT16        time);
+BOOLEAN igmpv3_send_group_source_query(MCGRP_CLASS *igmp, MCGRP_MBRSHP *igmp_mbrshp,
+        UINT16 vir_port_id, UINT32 phy_port_id, UINT32 group_address,
+        SORTED_LINKLIST** p_src_list, BOOLEAN was_excl, UINT32 clnt_ip_addr, BOOLEAN is_retx);
+BOOLEAN igmp_send_group_query(MCGRP_CLASS *igmp, MCGRP_MBRSHP* igmp_mbrshp, UINT16 tx_port_number,
+        UINT32 physical_port, UINT8 version, UINT32 group_address, UINT32 src_ip, UINT32 clnt_ip_addr,
+        BOOLEAN is_retx);
+void mcgrp_transition_to_INCL (MCGRP_CLASS   *mcgrp, MCGRP_L3IF    *mcgrp_vport, MCGRP_MBRSHP  *mcgrp_mbrshp,
+        MCGRP_ENTRY   *mcgrp_entry);
+void mcgrp_destroy_tracking_list (MCGRP_CLASS  *mcgrp, L2MCD_AVL_TREE  *clnt_tree);
+void mld_dump_mbrshp (MCGRP_CLASS   *mld, MCGRP_MBRSHP  *mld_mbrshp);
+void igmp_set_global_version (VRF_INDEX vrf_index, UINT32 version, BOOL force);
+BOOL mcgrp_initialize (UINT32 afi, MCGRP_CLASS *mcgrp);
+void mcgrp_handle_intf_ver_change (MCGRP_CLASS  *mcgrp, MCGRP_L3IF   *mcgrp_vport);
+void mcgrp_stop_tracking (MCGRP_CLASS  *mcgrp, MCGRP_L3IF   *mcgrp_vport);
+BOOLEAN pim_enabled (UINT32 afi, UINT16 port);
+void mcgrp_stop_phy_port (MCGRP_CLASS *mcgrp, MCGRP_L3IF *mcgrp_vport, MCGRP_PORT_ENTRY *mcgrp_pport);
+void mcgrp_start_phy_port (MCGRP_CLASS *mcgrp, MCGRP_L3IF *mcgrp_vport, MCGRP_PORT_ENTRY *mcgrp_pport);
+void mcgrp_stop_vir_port (MCGRP_CLASS  *mcgrp, MCGRP_L3IF   *mcgrp_vport);
+void mcgrp_start_vir_port (MCGRP_CLASS *mcgrp, MCGRP_L3IF *mcgrp_vport);
+void mcgrp_mcast_change_vport_membership (MCGRP_CLASS *mcgrp, MADDR_ST *source_address,
+        MADDR_ST *group_address, UINT16 router_port, UINT32 phy_port, UINT32 mcgrp_op);
+void igmpv3_sorted_linklist_free_list (MCGRP_CLASS *igmp, generic_pool_struct *pool, 
+        SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST *src);
+void mldv2_sorted_linklist_free_list (MCGRP_CLASS *mld, generic_pool_struct *pool,
+        SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST *src);
+void mcgrp_mcast_change_vport_membership (MCGRP_CLASS  *mcgrp, MADDR_ST *source_address,
+        MADDR_ST *group_address, UINT16 router_port, UINT32 phy_port, UINT32 mcgrp_op);
+void mcgrp_add_update_client (MCGRP_CLASS *mcgrp, L2MCD_AVL_TREE *clnt_tree, MADDR_ST *clnt_addr);
+BOOL mcgrp_src_list_empty ( MCGRP_MBRSHP *mcgrp_mbrsh, MCGRP_FILTER_MODE src_mode, UINT8 version);
+BOOLEAN mcgrp_send_group_source_query (MCGRP_CLASS *mcgrp, MCGRP_MBRSHP *mcgrp_mbrshp,
+        UINT16 vir_port_id, UINT32 phy_port_id, MADDR_ST *group_address, SORTED_LINKLIST **p_src_list,
+        BOOLEAN was_excl, MADDR_ST *clnt_ip_addr, enum BOOLEAN is_retx);
+void igmpv3_sorted_linklist_keep_common (MCGRP_CLASS *igmp, generic_pool_struct *pool,
+        SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+void mldv2_sorted_linklist_keep_common (MCGRP_CLASS *mld, generic_pool_struct *pool,
+        SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+void igmpv3_sorted_linklist_minus (MCGRP_CLASS *igmp, generic_pool_struct *pool,
+        SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+void mldv2_sorted_linklist_minus (MCGRP_CLASS *mld, generic_pool_struct *pool,
+        SORTED_LINKLIST_KEYINFO *key_info, SORTED_LINKLIST **dest_p, SORTED_LINKLIST *src);
+MCGRP_SOURCE* mcgrp_delist_source (MCGRP_MBRSHP *mcgrp_mbrshp, MADDR_ST *src_addr, MCGRP_FILTER_MODE src_mode);
+BOOLEAN igmp_staticGroup_exists_on_port (IP_ADDRESS  group_addr, PORT_ID port_id, UINT32 phy_port);
+BOOLEAN mld_staticGroup_exists_on_port (IPV6_ADDRESS *group_addr, PORT_ID port_id, UINT32 phy_port);
+int igmpv3_encode_src_list (IGMPV3_MESSAGE *igmpv3_msg, MCGRP_SOURCE *p_src, BOOLEAN all_srcs, BOOLEAN is_retx);
+int l2mcd_send_pkt(void *msg, ifindex_t phy_port_id, uint16_t vlan_id ,  MADDR_ST *grp_addr, MCGRP_CLASS  *mld, MCGRP_GLOBAL_CLASS  *mcgrp_glb, 
+    bool_t is_forwarded, bool_t is_bcast);
+void mld_tx_reports_leave_rcvd_on_edge_port(void *req, MADDR_ST *grp_addr, MCGRP_CLASS  *mld, MCGRP_L3IF *mld_vport);
+void igmpv3_destroy_client (MCGRP_CLASS *mcgrp, L2MCD_AVL_TREE *clnt_tree, UINT32 clnt_addr);
+void mcgrp_notify_source_list_add_blocked (MCGRP_CLASS   *mcgrp, MADDR_ST      *group_address,
+        MCGRP_L3IF    *mcgrp_vport, MCGRP_MBRSHP  *mcgrp_mbrshp, MCGRP_SOURCE  *src_list,
+        BOOL           sigchange);
+void mcgrp_start_query_process (MCGRP_CLASS *mcgrp, MCGRP_PORT_ENTRY *mcgrp_pport, 
+        UINT16 vir_port_id, UINT32 phy_port_id);
+void mcgrp_activate_static_groups (MCGRP_CLASS  *mcgrp, UINT16 vir_port_id, UINT32 target_port);
+
+void mld_send_l2mcd_sync_group_upd (MADDR_ST *group_address,  
+        UINT16 vir_port_id, int num_add_port, UINT32 add_phy_port_id, 
+        int num_del_port, UINT32 del_phy_port_id, MADDR_ST  *src_addr, 
+        uint8_t is_remote_report);
+void mld_send_l2mcd_sync_group_clr (UINT16 ivid, BOOLEAN isGlobalClear, uint8_t afi);
+void mld_send_l2mcd_sync_group_add (MADDR_ST *group_address, 
+        UINT16 vir_port_id, UINT32 phy_port_id, MADDR_ST  *src_addr, UINT8  filter_mode) ;
+void igmpv3_send_l2mcd_sync_group_upd (MADDR_ST *group_address, 
+        UINT16 vir_port_id, int num_add_port, UINT32 add_phy_port_id, 
+        int num_del_port, UINT32 del_phy_port_id, MADDR_ST  *src_addr, 
+        uint8_t is_remote_report, UINT8  filter_mode);
+
+void igmpv3_send_l2mcd_sync_group_add (MADDR_ST *group_address, 
+        UINT16 vir_port_id, UINT32 phy_port_id, MADDR_ST  *src_addr, UINT8  filter_mode);
+
+void l2mcd_sync_inherit_xg_port_to_all_sg (MCGRP_ENTRY *mcgrp_entry, uint32_t phy_ifindex, uint32_t vid, int add);
+
+void l2mcd_sync_inherit_xg_ports_to_this_sg (MCGRP_ENTRY *mcgrp_entry, MADDR_ST *src_addr, UINT8 filter_mode, uint32_t vid, int add);
 #endif

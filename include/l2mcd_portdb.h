@@ -103,5 +103,27 @@ typedef struct PORTDB_VRF_S {
 } portdb_vrf_t;
 
 
-
+char *portdb_get_ifname_from_portindex(unsigned long port_index);
+unsigned int portdb_get_portindex_from_ifname(char *ifname);
+int portdb_add_ifname(char *ifname, int name_len, unsigned int port_index);
+void portdb_init();
+int portdb_ifname_hash_init(void);
+unsigned int portdb_get_port_vrf_index(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index);
+int portdb_portindex_key_compare(unsigned long key1, unsigned long key2);
+UINT32 portdb_portindex_hash_function(unsigned long key);
+int portdb_gvid_hash_init(void);
+int portdb_vrf_hash_init(void);
+portdb_entry_t *portdb_find_port_entry(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index);
+unsigned char portdb_get_port_type(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index);
+int portdb_set_port_state(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index, unsigned char port_state);
+port_link_list_t *
+portdb_get_port_lowest_ipv4_addr_from_list(L2MCD_AVL_TREE *portdb_tree, UINT32 port_index);
+unsigned char portdb_get_port_state(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index);
+int portdb_delete_ifname(char *ifname);
+int portdb_remove_port_entry_from_tree(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index);
+int portdb_add_port_entry_to_tree(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index, 
+            VRF_INDEX vrf_id, unsigned long ifindex);
+int portdb_remove_addr_ipv4_list(L2MCD_AVL_TREE *portdb_tree, UINT32 port_index,
+                            UINT32 ipaddress);
+unsigned long portdb_get_port_ifindex(L2MCD_AVL_TREE *portdb_tree, unsigned int port_index);
 #endif //__L2MCD_PORTDB__

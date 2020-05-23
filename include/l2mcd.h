@@ -101,6 +101,7 @@ extern int applog_level_map[APP_LOG_LEVEL_MAX + 2];
 #define L2MCD_VLAN_IS_BM_SET(bm,x) L2MCD_IS_BIT_SET(bm[L2MCD_VLAN_BM_IDX(x)],L2MCD_VLAN_BM_POS(x)) 
 
 
+//AVL Tree Defnitions
 #define M_AVLL_OFFSETOF(STRUCT, FIELD)  (unsigned long)((char *)(&((STRUCT *)0)->FIELD) - (char *)0)
 typedef struct avl_table L2MCD_AVL_TABLE;
 typedef L2MCD_AVL_TABLE* L2MCD_AVL_TREE;
@@ -237,18 +238,48 @@ typedef struct L2MCD_CONTEXT {
     uint8_t             vlan_log_mask;
     uint8_t             fwk_dbg_mode;
     uint8_t             dbg_to_sys_log;
-    uint8_t             dbg_vlan_log_all;
+     uint8_t            dbg_vlan_log_all;
     char                l2mcd_global_mac[ETHER_ADDR_LEN];
     uint8_t             pktlog[L2MCD_VLAN_MAX+1];
     uint32_t            ifindex_to_kifindex[L2MCD_PORTDB_PHYIF_MAX_IDX];
     uint32_t            curr_dbg_level;
     char                rx_buf[L2MCD_RX_BUFFER_SIZE];
-    L2MCD_AVL_TREE      kif_to_if_tree;
-    L2MCD_AVL_TREE      if_to_kif_tree;
+    L2MCD_AVL_TREE         kif_to_if_tree;
+    L2MCD_AVL_TREE         if_to_kif_tree;
     int                 rx_is_l2_sock;
     int                 portdb_pending_count;
     uint8_t             port_init_done;
 } L2MCD_CONTEXT;
+
+#define L2MCD_CTL_CMD_RESET          0x1
+#define L2MCD_CTL_CMD_DB_LEVEL       0x2
+#define L2MCD_CTL_CMD_SESS_NAME      0x4
+#define L2MCD_CTL_CMD_SESS_VID       0x8
+#define L2MCD_CTL_CMD_DUMP_ALL       0x10
+#define L2MCD_CTL_CMD_PLOG_NAME      0x20
+#define L2MCD_CTL_CMD_CUSTOM         0x40
+#define L2MCD_CTL_CMD_PKT            0x80
+#define L2MCD_CTL_VLAN_CLEAR         0x100
+#define L2MCD_CTL_VLAN_STATS_CLEAR   0x200
+typedef struct L2MCD_CTL_MSG {
+    uint32_t cmd;
+    int  dbgLevel;
+    int  vid;
+    int  cmd_id;
+    char fname[100];
+} L2MCD_CTL_MSG;
+
+typedef struct L2MCD_APP_TABLE_ENTRY {
+    uint8_t     op_code;
+    uint8_t     port_oper;
+    uint8_t     is_static;  
+    uint8_t     is_remote; 
+    int         vlan_id; 
+    uint32_t    count; 
+    char        saddr[L2MCD_IP_ADDR_STR_SIZE];
+    char        gaddr[L2MCD_IP_ADDR_STR_SIZE];
+    PORT_ATTR   ports[L2MCD_IPC_MAX_PORTS]; 
+} L2MCD_APP_TABLE_ENTRY;
 
 
 extern L2MCD_CONTEXT l2mcd_context;
