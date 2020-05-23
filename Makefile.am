@@ -18,6 +18,8 @@ l2mcd_SOURCES = \
                  l2mcd_main.cpp \
                  common/applog.c \
                  common/malloc_stubs.c \
+				 common/hash_grow_generic.c \
+                 common/wheel_timer.c \
 			     common/avl.c \
                  common/timer_api.c \
                  common/linklist_api.c \
