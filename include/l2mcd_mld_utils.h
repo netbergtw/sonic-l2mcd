@@ -116,4 +116,22 @@ typedef struct mld_l2_static_group_s
     mcast_grp_addr_t  grp_addr;
     char ifname[100];
 } mld_l2_static_group_t;
+
+int linklist_delete_pointer(LINKLIST_TYPE **head, LINKLIST_TYPE *item);
+int32_t mld_get_port_num(uint16_t port);
+uint16_t mld_l3_get_port_from_ifindex(uint32_t ifindex, uint8_t type);
+uint32_t mld_get_port_ifindex(uint16_t port_id);
+uint32_t mld_get_vlan_id(uint16_t vir_port_id);
+uint32_t mld_get_ivid_vport(uint16_t vir_port_id, uint8_t afi);
+uint8_t  mld_get_vlan_type(uint16_t ivid);
+char * mld_get_if_name_from_ifindex(uint32_t ifindex);
+int l3_get_max_ports(void);
+void mld_get_ifname(char *if_name, int if_type, char *comp_if_name);
+uint32_t mld_get_lif_ifindex_from_ifname(char *ifname, uint32_t gvid, uint8_t vlan_type);
+int mld_get_port_bitmap_size();
+PORT_ID mcast_tnnl_get_output_port (PORT_ID tnnl_ifid);
+int ip_get_number_of_phy_ports(void);
+uint32_t  mld_mcast_tnnl_get_output_ifindex(uint16_t vir_port_id);
+uint32_t  mld_mcast_tnnl_get_output_port(uint32_t ifindex);
+
 #endif //__L2MCD_MLD_UTILS__

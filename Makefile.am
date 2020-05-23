@@ -18,16 +18,19 @@ l2mcd_SOURCES = \
                  l2mcd_main.cpp \
                  common/applog.c \
                  common/malloc_stubs.c \
-				 common/hash_grow_generic.c \
+                 common/hash_grow_generic.c \
                  common/wheel_timer.c \
-			     common/avl.c \
+                 common/avl.c \
                  common/timer_api.c \
                  common/linklist_api.c \
-				 common/l2mcd_data_struct.c \
+                 common/l2mcd_mcast_port.c \
+                 common/l2mcd_data_struct.c \
+                 common/l2mcd_mcast_addr.c \
                  port/main.c \
                  port/l2mcd_system.c \
 				 port/l2mcd_utils.c \
-				 port/l2mcd_portdb.c 
+				 port/l2mcd_portdb.c \
+                 port/l2mcd_mld_utils.c 
 
 l2mcd_CFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) 
 l2mcd_CPPFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) $(COV_CFLAGS) $(ASAN_CFLAGS)

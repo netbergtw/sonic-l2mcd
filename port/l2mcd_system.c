@@ -28,7 +28,12 @@
 #include <sys/ioctl.h>
 
 L2MCD_CONTEXT l2mcd_context;
-
+MCGRP_GLOBAL_CLASS    gMld, *pgMld = &gMld;
+MCGRP_GLOBAL_CLASS    gIgmp, *pgIgmp = &gIgmp;
+MCAST_GLOBAL_CLASS    gMulticast, *pgMulticast = &gMulticast;
+MCGRP_CLASS           Mld0, *pMld0 = &Mld0;
+MCGRP_CLASS           Igmp0, *pIgmp0 = &Igmp0;
+MCAST_CLASS           Multicast0, *pMulticast0 = &Multicast0;
 /*
  * l2mcd_process_ipc_msg 
  *
