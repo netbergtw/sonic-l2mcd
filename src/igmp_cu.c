@@ -82,7 +82,24 @@ void igmp_update_ve_member_ports (MCGRP_CLASS *igmp,
         UINT8        version,
         BOOL         force)
 {
+    MCGRP_PORT_ENTRY *igmp_pport;
 
+    igmp_pport = igmp_vport->phy_port_list;
+
+    // Update oper_version for all member ports that do not have an explicit configuration
+    for (; igmp_pport; igmp_pport = igmp_pport->next)
+    { 
+        if (igmp_pport->cfg_version == IGMP_VERSION_NONE)
+        {
+            igmp_pport->oper_version = version;
+        }
+        else if (force)
+        {
+            igmp_pport->oper_version = version;
+            igmp_pport->cfg_version  = igmp_vport->cfg_version;
+        }
+    }
+    (igmp->igmp_stats[igmp_vport->vir_port_id]).igmp_wrong_ver_query = 0;
 }
 
 
@@ -94,7 +111,60 @@ void igmp_set_global_version (VRF_INDEX  vrf_index,
         UINT32     version, 
         BOOL       force)
 {
+    MCGRP_CLASS       *igmp= IGMP_GET_INSTANCE_FROM_VRFINDEX(vrf_index);
+    IP_PORT_DB_ENTRY  *portP;
+    MCGRP_L3IF        *igmp_vport;
 
+    // When we reset the IGMP global version, the change needs to trickle
+    // down to all ports that do not have an explicitly configured version.
+
+    if (!force && igmp->cfg_version == version)
+        return;
+
+    igmp->cfg_version = (UINT8) version;
+    if (igmp->cfg_version == IGMP_VERSION_NONE)
+        igmp->oper_version = IGMP_VERSION_DEFAULT;
+    else
+        igmp->oper_version = igmp->cfg_version;
+
+    if (! igmp->enabled)
+        return;
+
+    // Walk thru all ports updating the port version for non-configured ports
+    for (portP = IP_PORT_DB_HEAD; portP != NULL; IP_PORT_DB_NEXT(portP))
+    {
+        igmp_vport = gIgmp.port_list[portP->port_number];
+
+        // If the port does not exist or is part of a virtual port
+        // or has a version explicitly configured, skip it.
+        // The reason why we skip virtual port members is that they are taken care of later
+        if (igmp_vport == NULL ||
+                (!force && (igmp_vport->cfg_version != IGMP_VERSION_NONE)) )
+        {
+            continue;
+        }
+
+        // Update this port's 
+        igmp_vport->oper_version = igmp->oper_version;
+        if (force)
+            igmp_vport->cfg_version = igmp->cfg_version;
+
+        // and if this is a virtual port, update its member ports too.
+        if (MCGRP_IS_PORT_VIRTUAL(igmp_vport))
+        {
+            igmp_update_ve_member_ports(igmp, igmp_vport, (UINT8)igmp_vport->oper_version, 
+                    force);
+        }
+        else
+        {
+            if (igmp_vport->phy_port_list)
+            { 
+                igmp_vport->phy_port_list->oper_version = igmp_vport->oper_version;
+                //      (igmp->igmp_stats[igmp_vport->phy_port_id]).igmp_wrong_ver_query = 0;
+                (igmp->igmp_stats[igmp_vport->vir_port_id]).igmp_wrong_ver_query = 0;
+            }
+        }
+    }
 } /* igmp_set_global_version() */
 
 
@@ -103,6 +173,51 @@ int igmp_set_if_igmp_version (VRF_INDEX  vrf_index,
         UINT16     vport, 
         UINT8      version)
 {
- 
+    MCGRP_CLASS  *igmp = IGMP_GET_INSTANCE_FROM_VRFINDEX(vrf_index);
+    MCGRP_L3IF   *igmp_vport;
+
+    if (!MCGRP_IS_VALID_INTF(vport))
+    {
+        return -1;
+    }
+
+    igmp_vport = gIgmp.port_list[vport];
+    if (igmp_vport == NULL)
+    {
+        igmp_vport = mcgrp_alloc_init_l3if_entry(igmp, vport);
+        if (!igmp_vport)
+            return -1;
+        igmp_vport->is_up = FALSE;
+    }
+    else
+    {
+        if (igmp_vport->cfg_version == version)
+            return 0;
+    }
+
+    L2MCD_LOG_DEBUG("%s(%d) vport:%d version:%d Prev vport->cfg_version:%d ", __FUNCTION__, __LINE__,
+            vport, version, igmp_vport->cfg_version);
+    igmp_vport->cfg_version  = version;
+    igmp_vport->oper_version = (igmp_vport->cfg_version == IGMP_VERSION_NONE) ?
+        igmp->oper_version : igmp_vport->cfg_version;
+
+    // Update the version for this VE's member ports if this is a virtual port
+    if (MCGRP_IS_PORT_VIRTUAL(igmp_vport))
+    {
+        igmp_update_ve_member_ports(igmp, igmp_vport, (UINT8) igmp_vport->oper_version,
+                FALSE /* do not force */);
+    }
+    else
+    { 
+        if (igmp_vport->phy_port_list)
+        {
+            igmp_vport->phy_port_list->oper_version = igmp_vport->oper_version;
+            (igmp->igmp_stats[igmp_vport->vir_port_id]).igmp_wrong_ver_query = 0;
+            L2MCD_LOG_DEBUG("%s(%d) phy_port:%d oper_version:%d ", __FUNCTION__, __LINE__, 
+                    igmp_vport->phy_port_list->phy_port_id, igmp_vport->phy_port_list->oper_version);
+        }
+    }
+    mcgrp_handle_intf_ver_change(igmp, igmp_vport);
+    return 0;
 }
 
