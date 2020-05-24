@@ -16,6 +16,7 @@ AM_CFLAGS = -DDEBUG -DBRCD_DCE_L3_PORT -DBRCD_DCE_L3_PIM_PORT -DBRCD_DCE_L36_PIM
 
 l2mcd_SOURCES = \
                  l2mcd_main.cpp \
+				 l2mcd_sync.cpp \
                  common/applog.c \
                  common/malloc_stubs.c \
                  common/hash_grow_generic.c \
