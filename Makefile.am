@@ -3,6 +3,7 @@ INCLUDES = -I $(top_srcdir) -I $(top_srcdir)/include -I ./include
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = l2mcd
+bin_PROGRAMS +=l2mcd_ctl
 SUBDIRS=include
 #if DEBUG
 #DBGFLAGS = -ggdb -DDEBUG
@@ -16,7 +17,7 @@ AM_CFLAGS = -DDEBUG -DBRCD_DCE_L3_PORT -DBRCD_DCE_L3_PIM_PORT -DBRCD_DCE_L36_PIM
 
 l2mcd_SOURCES = \
                  l2mcd_main.cpp \
-				 l2mcd_sync.cpp \
+                 l2mcd_sync.cpp \
                  common/applog.c \
                  common/malloc_stubs.c \
                  common/hash_grow_generic.c \
@@ -49,3 +50,9 @@ l2mcd_CPPFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) $(COV_CFLAGS) $(ASAN_
 l2mcd_LDADD = -lhiredis /usr/lib/x86_64-linux-gnu/libevent.a -lswsscommon  $(COV_LDFLAGS) $(ASAN_LDFLAGS)
 
 
+l2mcd_ctl_SOURCES = \
+                l2mcd_ctl.c
+
+l2mcd_ctl_CFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON)
+l2mcd_ctl_CPPFLAGS = $(DBGFLAGS) $(AM_CFLAGS) $(CFLAGS_COMMON) $(COV_CFLAGS) $(ASAN_CFLAGS)
+l2mcd_ctl_LDADD = -lhiredis /usr/lib/x86_64-linux-gnu/libevent.a -lswsscommon $(COV_LDFLAGS) $(ASAN_LDFLAGS)
