@@ -758,11 +758,11 @@ print_mrtr_list(mld_vlan_node_t *vlan_node, uint8_t afi)
 	mld_mrtr_t  *mrtr = NULL;
 	struct listnode *list_node;
 
-    //L2MCD_CLI_PRINT("\t Multicast Router ports:");
+    L2MCD_CLI_PRINT("\t Multicast Router ports:");
 	mrtr_list  = mld_vdb_vlan_get_mrtr_list(vlan_node, FALSE , afi);
     LIST_LOOP(mrtr_list, mrtr, list_node)
 	{
-		//L2MCD_CLI_PRINT("\t	%s ", mrtr->ifname);
+		L2MCD_CLI_PRINT("\t	%s ", mrtr->ifname);
 	}
 }
 
