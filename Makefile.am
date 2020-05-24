@@ -27,12 +27,16 @@ l2mcd_SOURCES = \
                  common/l2mcd_data_struct.c \
                  common/l2mcd_mcast_addr.c \
                  port/main.c \
+                 port/l2mcd_cli.c \
                  port/l2mcd_system.c \
-				 port/l2mcd_utils.c \
-				 port/l2mcd_portdb.c \
+                 port/l2mcd_utils.c \
+                 port/l2mcd_portdb.c \
+                 port/l2mcd_mld_mcast.c \
+                 port/mld_pkt.c \
+                 port/l2mcd_mld_pim_snoop.c \
+                 port/mld_vdb.c \
                  port/l2mcd_mld_port.c \
                  port/l2mcd_mld_utils.c \
-                 port/mld_vdb.c \
                  src/igmp.c \
                  src/igmp_cu.c \
                  src/igmp_fsm.c \
